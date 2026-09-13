@@ -1,11 +1,12 @@
 /**
- * مخطط قاعدة البيانات المحلية (SQLite).
- * قاعدة العمل الأساسية مفروضة في القاعدة نفسها لا في الواجهة:
+ * مخطط قاعدة البيانات المحلية (SQLite) — الإصدار 2.
+ * قواعد العمل مفروضة في القاعدة نفسها لا في الواجهة:
  *  - لا أرصدة سالبة (CHECK + TRIGGER)
  *  - كل حركة مخزون تُسجَّل في جدول movements
+ *  - سجل التدقيق مُسلسَل بالبصمات (append-only)
  */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const SCHEMA_SQL = `
 PRAGMA journal_mode = WAL;
@@ -53,6 +54,8 @@ CREATE TABLE IF NOT EXISTS users (
   failed_attempts      INTEGER NOT NULL DEFAULT 0,
   locked_until         TEXT,
   must_change_password INTEGER NOT NULL DEFAULT 1,
+  job_title            TEXT,
+  phone                TEXT,
   created_at           TEXT NOT NULL,
   updated_at           TEXT NOT NULL
 );
@@ -64,17 +67,19 @@ CREATE TABLE IF NOT EXISTS user_warehouses (
 );
 
 CREATE TABLE IF NOT EXISTS materials (
-  id          TEXT PRIMARY KEY,
-  code        TEXT NOT NULL UNIQUE,
-  name        TEXT NOT NULL,
-  unit        TEXT NOT NULL,
-  category    TEXT,
-  type        TEXT,
-  min_stock   INTEGER NOT NULL DEFAULT 0,
-  barcode     TEXT,
-  status      TEXT NOT NULL DEFAULT 'active',
-  created_at  TEXT NOT NULL,
-  updated_at  TEXT NOT NULL
+  id             TEXT PRIMARY KEY,
+  code           TEXT NOT NULL UNIQUE,
+  name           TEXT NOT NULL,
+  unit           TEXT NOT NULL,
+  category       TEXT,
+  classification TEXT,
+  type           TEXT,
+  min_stock      INTEGER NOT NULL DEFAULT 0,
+  max_stock      INTEGER NOT NULL DEFAULT 0,
+  barcode        TEXT,
+  status         TEXT NOT NULL DEFAULT 'active',
+  created_at     TEXT NOT NULL,
+  updated_at     TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS batches (
@@ -97,13 +102,15 @@ CREATE TABLE IF NOT EXISTS stock_items (
 
 CREATE TABLE IF NOT EXISTS movements (
   id                 TEXT PRIMARY KEY,
-  type               TEXT NOT NULL CHECK (type IN ('IN','OUT','TRANSFER','DISPOSE','ADJUST')),
+  type               TEXT NOT NULL CHECK (type IN ('IN','OUT','TRANSFER','DISPOSE','ADJUST','CUSTODY_OUT','CUSTODY_IN')),
   material_id        TEXT NOT NULL REFERENCES materials(id),
   warehouse_id       TEXT NOT NULL REFERENCES warehouses(id),
   to_warehouse_id    TEXT REFERENCES warehouses(id),
   batch_id           TEXT REFERENCES batches(id),
   quantity           INTEGER NOT NULL CHECK (quantity > 0),
+  delta              INTEGER,
   entry_number       TEXT,
+  expiry_date        TEXT,
   notes              TEXT,
   user_id            TEXT NOT NULL REFERENCES users(id),
   created_at         TEXT NOT NULL
@@ -111,13 +118,17 @@ CREATE TABLE IF NOT EXISTS movements (
 
 CREATE INDEX IF NOT EXISTS idx_movements_material ON movements(material_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_movements_created ON movements(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_movements_type ON movements(type, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_batches_expiry ON batches(warehouse_id, material_id, expiry_date);
+CREATE INDEX IF NOT EXISTS idx_materials_barcode ON materials(barcode);
 
 CREATE TABLE IF NOT EXISTS suppliers (
   id          TEXT PRIMARY KEY,
   name        TEXT NOT NULL,
+  contact     TEXT,
   phone       TEXT,
   address     TEXT,
+  source_type TEXT,
   status      TEXT NOT NULL DEFAULT 'active',
   created_at  TEXT NOT NULL,
   updated_at  TEXT NOT NULL
@@ -131,8 +142,21 @@ CREATE TABLE IF NOT EXISTS personal_custody (
   custodian_job       TEXT,
   custodian_nid_enc   TEXT,
   quantity            INTEGER NOT NULL CHECK (quantity > 0),
+  quantity_returned   INTEGER NOT NULL DEFAULT 0,
   status              TEXT NOT NULL DEFAULT 'active',
-  created_at          TEXT NOT NULL
+  notes               TEXT,
+  created_at          TEXT NOT NULL,
+  returned_at         TEXT
+);
+
+CREATE TABLE IF NOT EXISTS notices (
+  id           TEXT PRIMARY KEY,
+  title        TEXT NOT NULL,
+  body         TEXT NOT NULL,
+  kind         TEXT NOT NULL DEFAULT 'circular',
+  author_id    TEXT,
+  author_name  TEXT,
+  created_at   TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -160,5 +184,11 @@ BEFORE UPDATE ON stock_items
 FOR EACH ROW WHEN NEW.quantity < 0
 BEGIN
   SELECT RAISE(ABORT, 'NEGATIVE_STOCK_FORBIDDEN');
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_audit_no_delete
+BEFORE DELETE ON audit_log
+BEGIN
+  SELECT RAISE(ABORT, 'AUDIT_LOG_IS_APPEND_ONLY');
 END;
 `;

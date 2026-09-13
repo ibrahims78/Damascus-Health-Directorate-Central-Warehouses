@@ -3,7 +3,7 @@ import type { SessionUser } from './global';
 import LoginScreen from './screens/LoginScreen';
 import DashboardScreen from './screens/DashboardScreen';
 
-export default function App(): JSX.Element {
+export default function App(): React.ReactElement {
   const [session, setSession] = useState<SessionUser | null>(null);
   const [booting, setBooting] = useState(true);
   const [pwError, setPwError] = useState<string | null>(null);

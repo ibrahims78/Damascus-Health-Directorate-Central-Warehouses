@@ -5,7 +5,7 @@ export default function LoginScreen({
   onSignedIn,
 }: {
   onSignedIn: (user: SessionUser) => void;
-}): JSX.Element {
+}): React.ReactElement {
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

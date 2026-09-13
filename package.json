@@ -1,8 +1,8 @@
 {
-  "name": "whsham-desktop",
-  "version": "0.1.0",
+  "name": "damascus-health-directorate-central-warehouses",
+  "version": "0.2.0",
   "private": true,
-  "description": "WHSHAM — نظام إدارة المستودعات المركزي (نسخة سطح مكتب، محلية بالكامل)",
+  "description": "مستودعات مديرية صحة دمشق المركزية — تطبيق سطح مكتب محلي بالكامل",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -10,6 +10,8 @@
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "test": "esbuild tests/core.test.ts --bundle --platform=node --format=cjs --target=node20 --external:better-sqlite3 --alias:@shared=./src/shared --outfile=tests/.build/core.test.cjs && node --test tests/.build/core.test.cjs",
+    "verify": "npm run typecheck && npm run test && npm run build",
     "dist": "electron-vite build && electron-builder --win nsis"
   },
   "dependencies": {
@@ -35,8 +37,8 @@
     "vite": "^5.4.8"
   },
   "build": {
-    "appId": "sy.whsham.desktop",
-    "productName": "WHSHAM",
+    "appId": "sy.moh.damascus.centralwarehouses",
+    "productName": "Damascus Health Directorate Central Warehouses",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -54,7 +56,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "WHSHAM-Setup-${version}.exe"
+      "artifactName": "WHSHAM-CentralWarehouses-Setup-${version}.exe"
     }
   }
 }

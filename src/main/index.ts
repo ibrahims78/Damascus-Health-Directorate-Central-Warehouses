@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, shell } from 'electron';
+import { app, BrowserWindow, Menu, session, shell } from 'electron';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { initDatabase } from './db/database';
@@ -9,13 +9,14 @@ const isDev = !!process.env['ELECTRON_RENDERER_URL'];
 /** إعدادات أمنية صلبة: لا يصل محتوى الويب إلى Node ولا إلى نظام الملفات. */
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: 1440,
+    height: 920,
     minWidth: 1100,
     minHeight: 700,
     show: false,
     backgroundColor: '#f4f7fa',
-    title: 'WHSHAM — نظام إدارة المستودعات',
+    title: 'مستودعات مديرية صحة دمشق المركزية',
+    autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -36,9 +37,7 @@ function createWindow(): BrowserWindow {
   });
   win.webContents.on('will-navigate', (event, url) => {
     const allowed = process.env['ELECTRON_RENDERER_URL'];
-    if (!allowed || !url.startsWith(allowed)) {
-      event.preventDefault();
-    }
+    if (!allowed || !url.startsWith(allowed)) event.preventDefault();
   });
 
   if (process.env['ELECTRON_RENDERER_URL']) {
@@ -65,37 +64,53 @@ function applyContentSecurityPolicy(): void {
   });
 }
 
-app.whenReady().then(() => {
-  const userDataDir = app.getPath('userData');
-  const { dbPath, initialAdminPassword } = initDatabase(userDataDir);
-
-  if (initialAdminPassword) {
-    const file = join(userDataDir, 'first-run-admin-password.txt');
-    if (!existsSync(file)) {
-      writeFileSync(
-        file,
-        [
-          'كلمة مرور المدير الأولية (يجب تغييرها عند أول تسجيل دخول ثم حذف هذا الملف):',
-          initialAdminPassword,
-          '',
-        ].join('\n'),
-        { encoding: 'utf8', mode: 0o600 },
-      );
+// نسخة واحدة فقط من التطبيق تعمل في الوقت نفسه (يمنع تعارض الكتابة على القاعدة).
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    const [win] = BrowserWindow.getAllWindows();
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
     }
-    console.log(`[whsham] initial admin password written to ${file}`);
-  }
-
-  console.log(`[whsham] database: ${dbPath}`);
-
-  applyContentSecurityPolicy();
-  registerIpcHandlers();
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
-});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+  void app.whenReady().then(() => {
+    Menu.setApplicationMenu(null);
+
+    const userDataDir = app.getPath('userData');
+    const backupDir = join(userDataDir, 'backups');
+    const { dbPath, initialAdminPassword } = initDatabase(userDataDir);
+
+    if (initialAdminPassword) {
+      const file = join(userDataDir, 'first-run-admin-password.txt');
+      if (!existsSync(file)) {
+        writeFileSync(
+          file,
+          [
+            'كلمة مرور المدير الأولية — يجب تغييرها عند أول تسجيل دخول ثم حذف هذا الملف:',
+            initialAdminPassword,
+            '',
+          ].join('\n'),
+          { encoding: 'utf8', mode: 0o600 },
+        );
+      }
+      console.log(`[whsham] initial admin password written to ${file}`);
+    }
+
+    console.log(`[whsham] database: ${dbPath}`);
+
+    applyContentSecurityPolicy();
+    registerIpcHandlers({ dbPath, backupDir });
+    createWindow();
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+  });
+}

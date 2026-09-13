@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { newId, nowIso, sha256 } from './crypto';
 
 /**
@@ -18,7 +18,7 @@ export interface AuditEntry {
 
 const GENESIS = 'GENESIS';
 
-export function appendAudit(db: BetterSqlite3.Database, entry: AuditEntry): string {
+export function appendAudit(db: Database, entry: AuditEntry): string {
   const last = db
     .prepare('SELECT hash FROM audit_log ORDER BY seq DESC LIMIT 1')
     .get() as { hash: string } | undefined;
@@ -62,7 +62,7 @@ export interface AuditIntegrity {
   brokenAtSeq: number | null;
 }
 
-export function verifyAuditChain(db: BetterSqlite3.Database): AuditIntegrity {
+export function verifyAuditChain(db: Database): AuditIntegrity {
   const rows = db
     .prepare(
       `SELECT seq, id, user_id, action, entity, entity_id, details, prev_hash, hash, created_at

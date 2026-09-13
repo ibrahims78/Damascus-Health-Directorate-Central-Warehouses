@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { appendAudit } from './audit';
 import { getFieldKey } from '../db/database';
 import { decryptField, encryptField, newId, nowIso } from './crypto';
@@ -18,7 +18,7 @@ export interface AssignInput {
 }
 
 export async function assignCustody(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: AssignInput,
 ): Promise<{ id: string; balance: number }> {
@@ -74,7 +74,7 @@ export async function assignCustody(
 }
 
 export function returnCustody(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: { custodyId: string; quantity: number; notes?: string | null },
 ): { ok: true; balance: number } {
@@ -145,7 +145,7 @@ export interface CustodyRow {
 }
 
 export function listCustody(
-  db: BetterSqlite3.Database,
+  db: Database,
   filters: { status?: string | null } = {},
 ): CustodyRow[] {
   return db
@@ -166,7 +166,7 @@ export function listCustody(
 
 /** كشف الرقم الوطني يتطلب صلاحية CUSTODY_MANAGE ويُسجَّل في التدقيق. */
 export async function revealNationalId(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   custodyId: string,
 ): Promise<{ nationalId: string | null }> {

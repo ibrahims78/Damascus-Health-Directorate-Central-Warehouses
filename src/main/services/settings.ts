@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { nowIso } from './crypto';
 import { appendAudit } from './audit';
 import type { SessionUser } from './auth';
@@ -27,7 +27,7 @@ const DEFAULTS: Record<SettingKey, string> = {
   barcode_prefix: '',
 };
 
-export function getAllSettings(db: BetterSqlite3.Database): Record<string, string> {
+export function getAllSettings(db: Database): Record<string, string> {
   const rows = db.prepare('SELECT key, value FROM settings').all() as Array<{
     key: string;
     value: string;
@@ -38,7 +38,7 @@ export function getAllSettings(db: BetterSqlite3.Database): Record<string, strin
 }
 
 /** تاريخ إغلاق السنة المالية — لا تُقبل حركة بتاريخ أقدم منه. */
-export function getFiscalClosedUntil(db: BetterSqlite3.Database): string | null {
+export function getFiscalClosedUntil(db: Database): string | null {
   const row = db
     .prepare("SELECT value FROM settings WHERE key = 'fiscal_closed_until'")
     .get() as { value: string } | undefined;
@@ -47,7 +47,7 @@ export function getFiscalClosedUntil(db: BetterSqlite3.Database): string | null 
 }
 
 export function setSettings(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   patch: Partial<Record<SettingKey, string>>,
 ): Record<string, string> {

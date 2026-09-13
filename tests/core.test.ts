@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import Database from 'better-sqlite3';
+import { Database } from '../src/main/db/sqlite';
 import { SCHEMA_SQL } from '../src/main/db/schema';
 import { appendAudit, verifyAuditChain } from '../src/main/services/audit';
 import { adjust, issue, receive, transfer } from '../src/main/services/inventory';
@@ -16,9 +16,8 @@ const USER: SessionUser = {
   warehouseIds: [],
 };
 
-function freshDb(): Database.Database {
+function freshDb(): Database {
   const db = new Database(':memory:');
-  db.pragma('foreign_keys = ON');
   db.exec(SCHEMA_SQL);
 
   db.prepare("INSERT INTO roles (id, title_ar) VALUES ('Admin', 'مدير النظام')").run();
@@ -50,10 +49,8 @@ test('الإدخال يزيد الرصيد وينشئ دفعة وحركة', () =
   });
 
   assert.equal(result.balance, 10);
-  const movements = db.prepare('SELECT COUNT(*) AS c FROM movements').get() as { c: number };
-  assert.equal(movements.c, 1);
-  const batches = db.prepare('SELECT COUNT(*) AS c FROM batches').get() as { c: number };
-  assert.equal(batches.c, 1);
+  assert.equal((db.prepare('SELECT COUNT(*) AS c FROM movements').get() as { c: number }).c, 1);
+  assert.equal((db.prepare('SELECT COUNT(*) AS c FROM batches').get() as { c: number }).c, 1);
   db.close();
 });
 
@@ -65,11 +62,10 @@ test('الإخراج يستهلك الأقرب انتهاءً أولًا (FIFO)'
   const result = issue(db, USER, { materialId: 'mat_1', warehouseId: 'wh_central', quantity: 6 });
   assert.equal(result.balance, 4);
 
-  const remaining = db
+  const rows = db
     .prepare('SELECT batch_number AS batchNumber, quantity FROM batches ORDER BY batch_number')
     .all() as Array<{ batchNumber: string; quantity: number }>;
-
-  const byBatch = Object.fromEntries(remaining.map((row) => [row.batchNumber, row.quantity]));
+  const byBatch = Object.fromEntries(rows.map((row) => [row.batchNumber, row.quantity]));
   assert.equal(byBatch['SOON'], 0, 'يجب استهلاك الدفعة الأقرب انتهاءً كاملة');
   assert.equal(byBatch['LATE'], 4, 'يُستهلك 1 من الدفعة الأبعد انتهاءً');
   db.close();
@@ -84,10 +80,8 @@ test('رفض الإخراج عند نقص الرصيد دون أي أثر جزئ
     (error: Error & { code?: string }) => error.code === 'INSUFFICIENT_STOCK',
   );
 
-  const stock = db.prepare('SELECT quantity FROM stock_items').get() as { quantity: number };
-  assert.equal(stock.quantity, 3, 'يجب أن يبقى الرصيد كما هو بعد العملية المرفوضة');
-  const movements = db.prepare('SELECT COUNT(*) AS c FROM movements').get() as { c: number };
-  assert.equal(movements.c, 1, 'لا تُسجَّل حركة للعملية المرفوضة');
+  assert.equal((db.prepare('SELECT quantity FROM stock_items').get() as { quantity: number }).quantity, 3);
+  assert.equal((db.prepare('SELECT COUNT(*) AS c FROM movements').get() as { c: number }).c, 1);
   db.close();
 });
 

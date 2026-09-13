@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 
 /** التقارير: كلها قراءة فقط من القاعدة المحلية، وقابلة للتصدير إلى ملف. */
 
@@ -19,7 +19,7 @@ export interface ReportRequest {
   limit?: number | null;
 }
 
-export function runReport(db: BetterSqlite3.Database, request: ReportRequest): unknown[] {
+export function runReport(db: Database, request: ReportRequest): unknown[] {
   const limit = Math.min(Math.max(request.limit ?? 5000, 1), 50000);
   switch (request.kind) {
     case 'stock_summary':

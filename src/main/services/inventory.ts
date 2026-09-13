@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { appendAudit } from './audit';
 import { newId, nowIso } from './crypto';
 import type { SessionUser } from './auth';
@@ -29,7 +29,7 @@ export interface MovementResult {
 
 /** إضافة دفعة ورصيد — تُستدعى داخل معاملة فقط. */
 export function addBatch(
-  db: BetterSqlite3.Database,
+  db: Database,
   materialId: string,
   warehouseId: string,
   quantity: number,
@@ -55,7 +55,7 @@ export function addBatch(
 
 /** استهلاك FIFO: الأقرب انتهاءً أولًا ثم الأقدم استلامًا. يرفض كليًا عند نقص الرصيد. */
 export function consumeFifo(
-  db: BetterSqlite3.Database,
+  db: Database,
   materialId: string,
   warehouseId: string,
   quantity: number,
@@ -109,7 +109,7 @@ export function consumeFifo(
 }
 
 function assertFiscalOpen(
-  db: BetterSqlite3.Database,
+  db: Database,
   movementDate: string | null | undefined,
 ): void {
   if (!movementDate) return;
@@ -126,7 +126,7 @@ function assertFiscalOpen(
 }
 
 function recordMovement(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   movement: {
     type: string;
@@ -166,7 +166,7 @@ function recordMovement(
 }
 
 export function receive(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: ReceiveInput,
 ): MovementResult {
@@ -223,7 +223,7 @@ export interface IssueInput {
 }
 
 export function issue(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: IssueInput,
 ): MovementResult {
@@ -265,7 +265,7 @@ export function issue(
 }
 
 export function transfer(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: { materialId: string; fromWarehouseId: string; toWarehouseId: string; quantity: number; notes?: string | null },
 ): MovementResult {
@@ -329,7 +329,7 @@ export function transfer(
 }
 
 export function dispose(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: { materialId: string; warehouseId: string; quantity: number; reason: string },
 ): MovementResult {
@@ -365,7 +365,7 @@ export function dispose(
 
 /** تسوية الجرد: ضبط الرصيد إلى قيمة محسوبة، مع تسجيل الفرق بشكل صريح. */
 export function adjust(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: { materialId: string; warehouseId: string; countedQuantity: number; reason: string },
 ): MovementResult {
@@ -409,7 +409,7 @@ export function adjust(
 }
 
 export function getBalance(
-  db: BetterSqlite3.Database,
+  db: Database,
   materialId: string,
   warehouseId: string,
 ): number {
@@ -431,7 +431,7 @@ export interface StockRow {
 }
 
 export function listStock(
-  db: BetterSqlite3.Database,
+  db: Database,
   filters: { warehouseId?: string | null; query?: string | null; onlyBelowMin?: boolean } = {},
 ): StockRow[] {
   const like = filters.query ? `%${filters.query.trim()}%` : null;
@@ -461,7 +461,7 @@ export function listStock(
 
 /** بحث سريع بالباركود لإدخال/إخراج بسرعة. */
 export function findByBarcode(
-  db: BetterSqlite3.Database,
+  db: Database,
   code: string,
 ): { id: string; name: string; unit: string; code: string } | null {
   const value = code.trim();
@@ -476,7 +476,7 @@ export function findByBarcode(
 }
 
 function assertMaterialWarehouse(
-  db: BetterSqlite3.Database,
+  db: Database,
   materialId: string,
   warehouseId: string,
 ): void {

@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { appendAudit } from './audit';
 import { hashPassword, newId, nowIso, verifyPassword } from './crypto';
 import {
@@ -63,7 +63,7 @@ interface UserRow {
   must_change_password: number;
 }
 
-export function login(db: BetterSqlite3.Database, username: string, password: string): SessionUser {
+export function login(db: Database, username: string, password: string): SessionUser {
   const row = db
     .prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE')
     .get(username.trim()) as UserRow | undefined;
@@ -144,7 +144,7 @@ export function login(db: BetterSqlite3.Database, username: string, password: st
   return sessionUser;
 }
 
-function listUserWarehouses(db: BetterSqlite3.Database, userId: string): string[] {
+function listUserWarehouses(db: Database, userId: string): string[] {
   const rows = db
     .prepare('SELECT warehouse_id FROM user_warehouses WHERE user_id = ?')
     .all(userId) as Array<{ warehouse_id: string }>;
@@ -152,7 +152,7 @@ function listUserWarehouses(db: BetterSqlite3.Database, userId: string): string[
 }
 
 export function changePassword(
-  db: BetterSqlite3.Database,
+  db: Database,
   userId: string,
   oldPassword: string,
   newPassword: string,

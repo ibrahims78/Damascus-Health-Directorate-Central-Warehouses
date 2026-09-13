@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import { Database } from './sqlite';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
@@ -6,10 +6,10 @@ import { SCHEMA_SQL, SCHEMA_VERSION } from './schema';
 import { hashPassword, newId, nowIso } from '../services/crypto';
 import { ROLE_PERMISSIONS, ROLE_TITLES_AR, ROLES } from '@shared/permissions';
 
-let db: Database.Database | null = null;
+let db: Database | null = null;
 let fieldKey: Buffer | null = null;
 
-export function getDb(): Database.Database {
+export function getDb(): Database {
   if (!db) throw new Error('DB_NOT_INITIALIZED');
   return db;
 }
@@ -37,12 +37,9 @@ export function initDatabase(userDataDir: string): InitResult {
   mkdirSync(userDataDir, { recursive: true });
 
   const dbPath = join(userDataDir, 'whsham.db');
-  const keySecret = readOrCreateSecret(join(userDataDir, '.field-key'));
-  fieldKey = keySecret;
+  fieldKey = readOrCreateSecret(join(userDataDir, '.field-key'));
 
   db = new Database(dbPath);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
   db.exec(SCHEMA_SQL);
 
   const applied = db
@@ -61,8 +58,8 @@ export function initDatabase(userDataDir: string): InitResult {
   return { dbPath, initialAdminPassword };
 }
 
-/** تهيئة البيانات المرجعية: الأدوار، صلاحياتها، ومستودع مركزي بالإضافة إلى مدير أول. */
-function seed(database: Database.Database): string | null {
+/** تهيئة البيانات المرجعية: الأدوار وصلاحياتها ومستودع مركزي ومدير أول. */
+function seed(database: Database): string | null {
   const ts = nowIso();
   const insRole = database.prepare('INSERT OR IGNORE INTO roles (id, title_ar) VALUES (?, ?)');
   const insPerm = database.prepare(

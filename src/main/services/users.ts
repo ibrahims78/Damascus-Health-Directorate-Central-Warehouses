@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { appendAudit } from './audit';
 import { hashPassword, newId, nowIso } from './crypto';
 import { ROLE_PERMISSIONS, ROLES, type RoleId } from '@shared/permissions';
@@ -6,7 +6,7 @@ import type { SessionUser } from './auth';
 
 /** إدارة المستخدمين والأدوار — لا تُمنح صلاحية افتراضيًا لأي حساب جديد. */
 
-export function listUsers(db: BetterSqlite3.Database): unknown[] {
+export function listUsers(db: Database): unknown[] {
   return db
     .prepare(
       `SELECT u.id, u.username, u.full_name AS fullName, u.role_id AS role, u.status,
@@ -18,7 +18,7 @@ export function listUsers(db: BetterSqlite3.Database): unknown[] {
     .all();
 }
 
-export function listRoles(db: BetterSqlite3.Database): unknown[] {
+export function listRoles(db: Database): unknown[] {
   const rows = db
     .prepare(
       `SELECT r.id, r.title_ar AS titleAr,
@@ -43,7 +43,7 @@ export interface CreateUserInput {
 }
 
 export function createUser(
-  db: BetterSqlite3.Database,
+  db: Database,
   actor: SessionUser,
   input: CreateUserInput,
 ): { id: string; temporaryPassword: string } {
@@ -97,7 +97,7 @@ export function createUser(
 }
 
 export function setUserStatus(
-  db: BetterSqlite3.Database,
+  db: Database,
   actor: SessionUser,
   input: { userId: string; status: 'active' | 'pending' | 'disabled' },
 ): { ok: true } {
@@ -125,7 +125,7 @@ export function setUserStatus(
 }
 
 export function setUserRole(
-  db: BetterSqlite3.Database,
+  db: Database,
   actor: SessionUser,
   input: { userId: string; roleId: string; warehouseIds: string[] },
 ): { ok: true } {
@@ -161,7 +161,7 @@ export function setUserRole(
 }
 
 export function resetPassword(
-  db: BetterSqlite3.Database,
+  db: Database,
   actor: SessionUser,
   input: { userId: string },
 ): { temporaryPassword: string } {
@@ -189,7 +189,7 @@ export function rolePermissionMatrix(): Record<string, readonly string[]> {
 }
 
 function ensureNotLastActiveAdmin(
-  db: BetterSqlite3.Database,
+  db: Database,
   userId: string,
   nextStatus: string,
   nextRole?: string,

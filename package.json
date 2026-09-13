@@ -1,6 +1,6 @@
 {
   "name": "damascus-health-directorate-central-warehouses",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "مستودعات مديرية صحة دمشق المركزية — تطبيق سطح مكتب محلي بالكامل",
   "main": "out/main/index.js",
@@ -9,24 +9,22 @@
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit",
-    "rebuild": "electron-rebuild -f -w better-sqlite3",
-    "test": "esbuild tests/core.test.ts --bundle --platform=node --format=cjs --target=node20 --external:better-sqlite3 --alias:@shared=./src/shared --outfile=tests/.build/core.test.cjs && node --test tests/.build/core.test.cjs",
-    "verify": "npm run typecheck && npm run test && npm run build",
+    "test": "esbuild tests/core.test.ts --bundle --platform=node --format=cjs --target=node20 --alias:@shared=./src/shared --outfile=tests/.build/core.test.cjs && node --test tests/.build/core.test.cjs",
+    "test:e2e": "esbuild tests/scenario.e2e.ts --bundle --platform=node --format=cjs --target=node20 --alias:@shared=./src/shared --outfile=tests/.build/scenario.e2e.cjs && node tests/.build/scenario.e2e.cjs",
+    "verify": "npm run typecheck && npm run test && npm run test:e2e && npm run build",
+    "setup:electron": "node scripts/setup-electron.mjs",
     "dist": "electron-vite build && electron-builder --win nsis"
   },
   "dependencies": {
-    "better-sqlite3": "^11.5.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@electron/rebuild": "^3.7.1",
-    "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.7.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
-    "electron": "^33.0.0",
+    "electron": "44.3.0",
     "electron-builder": "^25.1.8",
     "electron-vite": "^2.3.0",
     "postcss": "^8.4.47",
@@ -39,6 +37,7 @@
   "build": {
     "appId": "sy.moh.damascus.centralwarehouses",
     "productName": "Damascus Health Directorate Central Warehouses",
+    "npmRebuild": false,
     "directories": {
       "output": "release",
       "buildResources": "build"

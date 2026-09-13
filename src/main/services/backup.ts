@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { appendAudit } from './audit';
@@ -18,7 +18,7 @@ function timestamp(): string {
 }
 
 export function createBackup(
-  db: BetterSqlite3.Database,
+  db: Database,
   dbPath: string,
   backupDir: string,
   user: SessionUser,
@@ -76,7 +76,7 @@ export function pruneBackups(backupDir: string, keep = 20): number {
  * لا تُنفَّذ إلا بصلاحية BACKUP_MANAGE وتأكيد صريح من الواجهة.
  */
 export function restoreBackup(
-  db: BetterSqlite3.Database,
+  db: Database,
   dbPath: string,
   backupFile: string,
   backupDir: string,

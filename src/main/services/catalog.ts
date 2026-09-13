@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { newId, nowIso } from './crypto';
 import { appendAudit } from './audit';
 import type { SessionUser } from './auth';
@@ -18,7 +18,7 @@ export interface MaterialInput {
 }
 
 export function listMaterials(
-  db: BetterSqlite3.Database,
+  db: Database,
   filters: { query?: string | null; onlyBelowMin?: boolean } = {},
 ): unknown[] {
   const like = filters.query ? `%${filters.query.trim()}%` : null;
@@ -37,7 +37,7 @@ export function listMaterials(
 }
 
 export function createMaterial(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: MaterialInput,
 ): { id: string } {
@@ -80,7 +80,7 @@ export function createMaterial(
 }
 
 export function updateMaterial(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: MaterialInput & { id: string; status?: string | null },
 ): { ok: true } {
@@ -127,7 +127,7 @@ export interface WarehouseInput {
   parentId?: string | null;
 }
 
-export function listWarehouses(db: BetterSqlite3.Database): unknown[] {
+export function listWarehouses(db: Database): unknown[] {
   return db
     .prepare(
       `SELECT w.id, w.name, w.type, w.category, w.location, w.manager_id AS managerId,
@@ -140,7 +140,7 @@ export function listWarehouses(db: BetterSqlite3.Database): unknown[] {
 }
 
 export function saveWarehouse(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: WarehouseInput,
 ): { id: string } {
@@ -209,7 +209,7 @@ export interface SupplierInput {
   sourceType?: string | null;
 }
 
-export function listSuppliers(db: BetterSqlite3.Database): unknown[] {
+export function listSuppliers(db: Database): unknown[] {
   return db
     .prepare(
       `SELECT id, name, contact, phone, address, source_type AS sourceType, status
@@ -219,7 +219,7 @@ export function listSuppliers(db: BetterSqlite3.Database): unknown[] {
 }
 
 export function saveSupplier(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: SupplierInput,
 ): { id: string } {

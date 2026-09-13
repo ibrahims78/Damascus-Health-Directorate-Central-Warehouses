@@ -1,11 +1,11 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import type { Database } from '../db/sqlite';
 import { appendAudit } from './audit';
 import { newId, nowIso } from './crypto';
 import type { SessionUser } from './auth';
 
 /** لوحة التعميمات والإشعارات الداخلية (نظام أحادي الجهاز: إشعارات لا مراسلات). */
 
-export function listNotices(db: BetterSqlite3.Database, limit = 100): unknown[] {
+export function listNotices(db: Database, limit = 100): unknown[] {
   return db
     .prepare(
       `SELECT id, title, body, kind, author_name AS authorName, created_at AS createdAt
@@ -15,7 +15,7 @@ export function listNotices(db: BetterSqlite3.Database, limit = 100): unknown[] 
 }
 
 export function createNotice(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: { title: string; body: string; kind?: string | null },
 ): { id: string } {
@@ -44,7 +44,7 @@ export function createNotice(
 }
 
 export function deleteNotice(
-  db: BetterSqlite3.Database,
+  db: Database,
   user: SessionUser,
   input: { id: string },
 ): { ok: true } {

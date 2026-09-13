@@ -1,10 +1,27 @@
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
-import { existsSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { initDatabase } from './db/database';
 import { registerIpcHandlers } from './ipc/register';
 
 const isDev = !!process.env['ELECTRON_RENDERER_URL'];
+
+/** سجل تشخيصي محلي بسيط — يساعد الدعم الفني دون أي إرسال خارجي. */
+function logLine(message: string): void {
+  try {
+    const file = join(app.getPath('userData'), 'diagnostics.log');
+    appendFileSync(file, `[${new Date().toISOString()}] ${message}\n`, 'utf8');
+  } catch {
+    /* لا يجب أن يفشل التشغيل بسبب السجل */
+  }
+}
+
+process.on('uncaughtException', (error) => {
+  logLine(`uncaughtException: ${error?.stack ?? String(error)}`);
+});
+process.on('unhandledRejection', (reason) => {
+  logLine(`unhandledRejection: ${String(reason)}`);
+});
 
 /** إعدادات أمنية صلبة: لا يصل محتوى الويب إلى Node ولا إلى نظام الملفات. */
 function createWindow(): BrowserWindow {
@@ -29,6 +46,12 @@ function createWindow(): BrowserWindow {
   });
 
   win.once('ready-to-show', () => win.show());
+  win.webContents.on('did-fail-load', (_event, code, description, url) => {
+    logLine(`did-fail-load ${code} ${description} ${url}`);
+  });
+  win.webContents.on('render-process-gone', (_event, details) => {
+    logLine(`render-process-gone ${JSON.stringify(details)}`);
+  });
 
   // منع فتح نوافذ جديدة أو التنقّل خارج التطبيق.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -64,53 +87,71 @@ function applyContentSecurityPolicy(): void {
   });
 }
 
-// نسخة واحدة فقط من التطبيق تعمل في الوقت نفسه (يمنع تعارض الكتابة على القاعدة).
-if (!app.requestSingleInstanceLock()) {
-  app.quit();
-} else {
-  app.on('second-instance', () => {
-    const [win] = BrowserWindow.getAllWindows();
-    if (win) {
-      if (win.isMinimized()) win.restore();
-      win.focus();
+function bootstrap(): void {
+  Menu.setApplicationMenu(null);
+
+  const userDataDir = app.getPath('userData');
+  const backupDir = join(userDataDir, 'backups');
+  logLine(`startup: app=${app.getName()} electron=${process.versions['electron']} node=${process.versions.node} userData=${userDataDir}`);
+
+  const { dbPath, initialAdminPassword } = initDatabase(userDataDir);
+  logLine(`database ready: ${dbPath}`);
+
+  if (initialAdminPassword) {
+    const file = join(userDataDir, 'first-run-admin-password.txt');
+    if (!existsSync(file)) {
+      writeFileSync(
+        file,
+        [
+          'كلمة مرور المدير الأولية — يجب تغييرها عند أول تسجيل دخول ثم حذف هذا الملف:',
+          initialAdminPassword,
+          '',
+        ].join('\n'),
+        { encoding: 'utf8', mode: 0o600 },
+      );
     }
-  });
+    logLine('initial admin password generated');
+  }
 
-  void app.whenReady().then(() => {
-    Menu.setApplicationMenu(null);
+  applyContentSecurityPolicy();
+  registerIpcHandlers({ dbPath, backupDir });
+  logLine('ipc handlers registered');
 
-    const userDataDir = app.getPath('userData');
-    const backupDir = join(userDataDir, 'backups');
-    const { dbPath, initialAdminPassword } = initDatabase(userDataDir);
+  createWindow();
+  logLine('window created');
+}
 
-    if (initialAdminPassword) {
-      const file = join(userDataDir, 'first-run-admin-password.txt');
-      if (!existsSync(file)) {
-        writeFileSync(
-          file,
-          [
-            'كلمة مرور المدير الأولية — يجب تغييرها عند أول تسجيل دخول ثم حذف هذا الملف:',
-            initialAdminPassword,
-            '',
-          ].join('\n'),
-          { encoding: 'utf8', mode: 0o600 },
-        );
+// نسخة واحدة فقط من التطبيق (يمنع تعارض الكتابة على القاعدة).
+try {
+  if (!app.requestSingleInstanceLock()) {
+    logLine('another instance is running — exiting');
+    app.quit();
+  } else {
+    app.on('second-instance', () => {
+      const [win] = BrowserWindow.getAllWindows();
+      if (win) {
+        if (win.isMinimized()) win.restore();
+        win.focus();
       }
-      console.log(`[whsham] initial admin password written to ${file}`);
-    }
+    });
 
-    console.log(`[whsham] database: ${dbPath}`);
-
-    applyContentSecurityPolicy();
-    registerIpcHandlers({ dbPath, backupDir });
-    createWindow();
+    void app
+      .whenReady()
+      .then(() => {
+        bootstrap();
+      })
+      .catch((error) => {
+        logLine(`bootstrap failed: ${(error as Error)?.stack ?? String(error)}`);
+      });
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
-  });
 
-  app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
-  });
+    app.on('window-all-closed', () => {
+      if (process.platform !== 'darwin') app.quit();
+    });
+  }
+} catch (error) {
+  logLine(`fatal at startup: ${(error as Error)?.stack ?? String(error)}`);
 }

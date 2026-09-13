@@ -1,0 +1,23 @@
+node_modules/
+out/
+release/
+dist/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# لا تُودِع أي أسرار أو بيانات تشغيلية
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+data/
+logs/
+backups/
+
+*.tsbuildinfo

@@ -9,7 +9,7 @@ on:
 
 jobs:
   verify:
-    name: فحص الأنواع والاختبارات والبناء
+    name: verify
     runs-on: ubuntu-latest
     env:
       # لا حاجة لتنزيل وقت تشغيل Electron في بيئة الفحص (لا تُشغَّل واجهة رسومية).

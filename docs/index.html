@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>مستودعات مديرية صحة دمشق المركزية — تطبيق سطح مكتب محلي بالكامل</title>
+<meta name="description" content="نظام إدارة مستودعات صحية مركزية كتطبيق سطح مكتب يعمل دون إنترنت ودون خادم، بقاعدة بيانات محلية وواجهة عربية." />
+<style>
+  :root{
+    --brand:#1a5276; --brand-dark:#12405e; --brand-soft:#eaf2f8;
+    --ink:#0f172a; --muted:#5b6b82; --line:#dbe4ec; --bg:#f4f7fa; --card:#fff;
+    --ok:#059669;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Tahoma,system-ui,sans-serif;line-height:1.9;font-size:16px}
+  a{color:var(--brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  header.hero{background:linear-gradient(135deg,#1a5276,#0d3348);color:#fff;padding:64px 0 56px}
+  .hero h1{margin:0 0 12px;font-size:34px;line-height:1.5}
+  .hero p{margin:0;font-size:17px;opacity:.94;max-width:760px}
+  .badges{margin-top:22px;display:flex;flex-wrap:wrap;gap:9px}
+  .badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);
+    padding:6px 13px;border-radius:999px;font-size:13px}
+  .cta{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px}
+  .btn{display:inline-block;padding:12px 22px;border-radius:12px;font-weight:700;font-size:15px}
+  .btn-primary{background:#fff;color:var(--brand);}
+  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35)}
+  .btn:hover{text-decoration:none;opacity:.92}
+
+  section{padding:48px 0}
+  h2{font-size:25px;margin:0 0 8px}
+  .lead{color:var(--muted);margin:0 0 26px;font-size:15.5px}
+
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .card h3{margin:0 0 8px;font-size:17px;color:var(--brand-dark)}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .icon{width:38px;height:38px;border-radius:11px;background:var(--brand-soft);
+    display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:12px}
+
+  figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:12px;overflow:hidden}
+  figure img{width:100%;height:auto;border-radius:11px;display:block}
+  figcaption{color:var(--muted);font-size:13.5px;text-align:center;padding-top:10px}
+
+  pre{background:#0f172a;color:#e2e8f0;padding:16px 18px;border-radius:12px;overflow-x:auto;
+    font-family:Consolas,"Courier New",monospace;font-size:13.5px;direction:ltr;text-align:left}
+  code{background:#eef2f7;padding:2px 6px;border-radius:6px;font-size:13.5px;
+    font-family:Consolas,monospace;direction:ltr;display:inline-block}
+
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;font-size:14.5px}
+  th,td{padding:11px 14px;border-bottom:1px solid var(--line);text-align:right}
+  th{background:var(--brand-soft);color:var(--brand-dark);font-weight:700}
+  tr:last-child td{border-bottom:none}
+
+  .pill{display:inline-block;background:var(--brand-soft);color:var(--brand-dark);
+    padding:4px 10px;border-radius:999px;font-size:13px;margin:0 0 8px}
+
+  footer{background:#0d3348;color:#c9dbe6;padding:28px 0;font-size:14px}
+  footer a{color:#fff}
+  @media (max-width:640px){
+    .hero h1{font-size:26px}
+    section{padding:34px 0}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>مستودعات مديرية صحة دمشق المركزية</h1>
+    <p>تطبيق سطح مكتب لإدارة مخزون المستودعات الصحية: كتالوج المواد، الأرصدة والدفعات، حركات الإدخال والإخراج والنقل،
+       العهد الشخصية، التقارير، وسجل تدقيق غير قابل للتعديل — يعمل <strong>محليًا بالكامل</strong> دون إنترنت
+       ودون خادم، وبقاعدة بيانات على الجهاز نفسه.</p>
+    <div class="badges">
+      <span class="badge">Electron 44</span>
+      <span class="badge">React 19 + TypeScript</span>
+      <span class="badge">node:sqlite — بلا وحدات أصلية</span>
+      <span class="badge">واجهة عربية RTL</span>
+      <span class="badge">رخصة MIT</span>
+    </div>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/releases">تنزيل النسخة المحمولة</a>
+      <a class="btn btn-ghost" href="https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses">مستودع الكود</a>
+    </div>
+  </div>
+</header>
+
+<section class="wrap">
+  <h2>لماذا هذا النظام؟</h2>
+  <p class="lead">مصمَّم لبيئة عمل مقيَّدة الشبكة: كل شيء يعمل على جهاز واحد، والبيانات لا تخرج منه.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="icon">📦</div>
+      <h3>مخزون بنظام FIFO حقيقي</h3>
+      <p>إدخال بدفعات مع رقم الدفعة وتاريخ الصلاحية، وإخراج يستهلك الأقرب انتهاءً أولًا تلقائيًا — داخل معاملة واحدة لا تقبل الأرصدة السالبة.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔒</div>
+      <h3>أمان في طبقة واحدة</h3>
+      <p>لا منطق أمني في الواجهة: الصلاحيات تُفحص في العملية الرئيسية قبل التنفيذ، وكل عملية حساسة تُقيَّد في سجل تدقيق مُسلسَل بالبصمات.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🪪</div>
+      <h3>حماية البيانات الشخصية</h3>
+      <p>الرقم الوطني في العهد الشخصية يُخزَّن مشفَّرًا بـAES-256-GCM، ولا يُكشف إلا بصلاحية صريحة وتُسجَّل مع كل كشف.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📊</div>
+      <h3>تقارير جاهزة وتصدير</h3>
+      <p>ستة تقارير: أرصدة · حركات · تحت الحد الأدنى · قرب الانتهاء · عهد مفتوحة · سجل التدقيق — مع تصدير CSV متوافق مع Excel العربي.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏷️</div>
+      <h3>باركود ومسح ضوئي</h3>
+      <p>مسح بالكاميرا (BarcodeDetector) مع دعم أجهزة قراءة الباركود عبر الإدخال اليدوي السريع.</p>
+    </div>
+    <div class="card">
+      <div class="icon">💾</div>
+      <h3>نسخ احتياطي واستعادة آمنة</h3>
+      <p>نسخة بعد فحص سلامة القاعدة، ونسخة أمان تلقائية قبل أي استعادة — كل ذلك من داخل التطبيق.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>لقطة من التطبيق</h2>
+  <p class="lead">واجهة عربية كاملة من اليمين إلى اليسار، بواجهة واضحة وبطاقات مؤشرات فورية.</p>
+  <figure>
+    <img src="screenshot.png" alt="شاشة تسجيل الدخول في تطبيق مستودعات مديرية صحة دمشق المركزية" />
+    <figcaption>شاشة تسجيل الدخول — النسخة المحمولة قيد التشغيل</figcaption>
+  </figure>
+</section>
+
+<section class="wrap">
+  <h2>التشغيل والتحقق</h2>
+  <p class="lead">لا يحتاج التطبيق إلى خادم أو خدمة سحابية. للمطوّر:</p>
+  <pre>npm install --ignore-scripts
+npm run setup:electron      # تركيب وقت تشغيل Electron محليًا
+npm run verify              # أنواع + اختبارات + سيناريو كامل + بناء
+npm run build:portable      # نسخة محمولة جاهزة للتشغيل دون تثبيت</pre>
+
+  <table>
+    <tr><th>الفحص</th><th>النتيجة</th></tr>
+    <tr><td>فحص الأنواع (TypeScript strict)</td><td>0 أخطاء</td></tr>
+    <tr><td>اختبارات الوحدة</td><td>8/8 ناجحة</td></tr>
+    <tr><td>السيناريو الكامل على قاعدة حقيقية</td><td>ناجح — إدخال 65 وحدة · FIFO · نقل · عهدة مشفَّرة · تقارير · نسخة احتياطية · سلسلة تدقيق سليمة</td></tr>
+    <tr><td>البناء الإنتاجي + سير عمل CI</td><td>ناجح على كل دفع</td></tr>
+  </table>
+</section>
+
+<section class="wrap">
+  <h2>الأمان — المبدأ الحاكم</h2>
+  <p class="lead">لا يوجد أي منطق أمني في الواجهة؛ كل قرار يُتخذ ويُفحص قبل التنفيذ.</p>
+  <div class="grid">
+    <div class="card"><h3>عزل المحتوى</h3><p>contextIsolation · sandbox · تعطيل nodeIntegration · سياسة CSP · منع التنقّل وفتح النوافذ.</p></div>
+    <div class="card"><h3>جسر IPC مُحكم</h3><p>42 قناة بأسماء صريحة + تحقق zod لكل حِمل + خريطة صلاحية لكل قناة + عدم تسريب التفاصيل التقنية.</p></div>
+    <div class="card"><h3>مصادقة قوية</h3><p>scrypt بملح لكل مستخدم · مقارنة زمنية ثابتة · قفل بعد 5 محاولات · إلزام تغيير كلمة المرور الأولى.</p></div>
+    <div class="card"><h3>صلاحيات صريحة</h3><p>8 أدوار × 25 صلاحية من مصدر واحد · إنكار ضمني · حماية آخر مدير نظام · تسجيل كل محاولة مرفوضة.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>مستودعات مديرية صحة دمشق المركزية — <span dir="ltr">Damascus Health Directorate Central Warehouses</span></p>
+    <p>رخصة MIT · <a href="https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses">الكود على GitHub</a> · <a href="https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/releases">الإصدارات</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

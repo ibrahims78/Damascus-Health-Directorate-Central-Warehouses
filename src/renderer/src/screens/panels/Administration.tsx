@@ -490,7 +490,7 @@ export function SettingsPanel({ session }: { session: SessionUser }) {
           <li>
             المستخدم الحالي: <b>{session.fullName}</b> ({session.role})
           </li>
-          <li>نسخة التطبيق: 0.2.0</li>
+          <li>نسخة التطبيق: 1.0.0</li>
           <li>قاعدة البيانات: SQLite محلية (WAL) — لا اتصال شبكي.</li>
           <li>تشفير الحقول الحساسة: AES-256-GCM بمفتاح محلي مُقيَّد الصلاحيات.</li>
           <li>سجل التدقيق: إضافة فقط (append-only) مع منع الحذف على مستوى القاعدة.</li>

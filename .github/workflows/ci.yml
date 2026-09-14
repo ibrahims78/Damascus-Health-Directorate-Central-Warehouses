@@ -25,6 +25,14 @@ jobs:
           node-version: '24'
           cache: npm
 
+      - name: التحقق من مصدر الحزم في قفل الاعتماديات
+        run: |
+          # يمنع دفع قفل اعتماديات يحتوي روابط سجل خاصة ببيئة تطوير معينة
+          if grep -qE 'package-firewall|replit\.internal' package-lock.json; then
+            echo "::error::package-lock.json يحتوي روابط سجل غير عامة. أعد توليده بسجل npm العام ثم أعد الدفع."
+            exit 1
+          fi
+
       - name: تثبيت الاعتماديات
         run: npm ci --ignore-scripts
 

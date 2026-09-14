@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: فحص الأنواع والاختبارات والبناء
+    runs-on: ubuntu-latest
+    env:
+      # لا حاجة لتنزيل وقت تشغيل Electron في بيئة الفحص (لا تُشغَّل واجهة رسومية).
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+    steps:
+      - name: استنساخ المستودع
+        uses: actions/checkout@v4
+
+      - name: تهيئة Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: تثبيت الاعتماديات
+        run: npm ci --ignore-scripts
+
+      - name: فحص الأنواع (TypeScript)
+        run: npm run typecheck
+
+      - name: اختبارات الوحدة
+        run: npm run test
+
+      - name: السيناريو الكامل على قاعدة بيانات حقيقية
+        run: npm run test:e2e
+
+      - name: البناء الإنتاجي
+        run: npm run build

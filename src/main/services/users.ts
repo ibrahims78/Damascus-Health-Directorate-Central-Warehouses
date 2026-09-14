@@ -1,6 +1,7 @@
 import type { Database } from '../db/sqlite';
 import { appendAudit } from './audit';
 import { hashPassword, newId, nowIso } from './crypto';
+import { randomBytes } from 'node:crypto';
 import { ROLE_PERMISSIONS, ROLES, type RoleId } from '@shared/permissions';
 import type { SessionUser } from './auth';
 
@@ -211,10 +212,16 @@ function ensureNotLastActiveAdmin(
 }
 
 function generateTemporaryPassword(): string {
+  // مُولَّد آمن: randomBytes لا Math.random، مع رفض القيم الخارجة لإزالة التحيّز.
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  const limit = Math.floor(256 / alphabet.length) * alphabet.length;
   let out = '';
-  for (let i = 0; i < 12; i += 1) {
-    out += alphabet[Math.floor(Math.random() * alphabet.length)] ?? 'x';
+  while (out.length < 12) {
+    for (const byte of randomBytes(16)) {
+      if (byte >= limit) continue;
+      out += alphabet[byte % alphabet.length] ?? 'x';
+      if (out.length === 12) break;
+    }
   }
   return out;
 }

@@ -1,5 +1,5 @@
 import { Database } from './sqlite';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { SCHEMA_SQL, SCHEMA_VERSION } from './schema';
@@ -20,12 +20,22 @@ export function getFieldKey(): Buffer {
 }
 
 function readOrCreateSecret(path: string, bytes = 32): Buffer {
-  if (existsSync(path)) {
+  try {
+    const existing = readFileSync(path, 'utf8').trim();
+    if (existing) return Buffer.from(existing, 'hex');
+  } catch {
+    /* الملف غير موجود بعد — سيُنشأ أدناه */
+  }
+
+  const secret = randomBytes(bytes);
+  try {
+    // إنشاء حصري (flag: wx): يمنع الكتابة فوق سرّ قائم ويمنع أي حالة سباق بين العمليات.
+    writeFileSync(path, secret.toString('hex'), { encoding: 'utf8', mode: 0o600, flag: 'wx' });
+    return secret;
+  } catch {
+    // سبق أن أنشأه تنفيذ آخر — نقرأ القيمة الفعلية من القرص.
     return Buffer.from(readFileSync(path, 'utf8').trim(), 'hex');
   }
-  const secret = randomBytes(bytes);
-  writeFileSync(path, secret.toString('hex'), { encoding: 'utf8', mode: 0o600 });
-  return secret;
 }
 
 export interface InitResult {

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
-import { appendFileSync, existsSync, writeFileSync } from 'node:fs';
+import { appendFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { initDatabase } from './db/database';
 import { registerIpcHandlers } from './ipc/register';
@@ -99,7 +99,8 @@ function bootstrap(): void {
 
   if (initialAdminPassword) {
     const file = join(userDataDir, 'first-run-admin-password.txt');
-    if (!existsSync(file)) {
+    try {
+      // إنشاء حصري (flag: wx): لا نكتب فوق ملف قائم، ولا توجد حالة سباق between check و write.
       writeFileSync(
         file,
         [
@@ -107,10 +108,12 @@ function bootstrap(): void {
           initialAdminPassword,
           '',
         ].join('\n'),
-        { encoding: 'utf8', mode: 0o600 },
+        { encoding: 'utf8', mode: 0o600, flag: 'wx' },
       );
+      logLine('initial admin password generated');
+    } catch {
+      logLine('initial admin password file already exists — left unchanged');
     }
-    logLine('initial admin password generated');
   }
 
   applyContentSecurityPolicy();

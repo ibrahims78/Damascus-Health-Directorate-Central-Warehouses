@@ -5,14 +5,15 @@ import { resolve } from 'node:path';
 const shared = resolve(__dirname, 'src/shared');
 
 /**
- * لا تُترك الحزم خارجية في العملية الرئيسية: النسخة المحمولة (portable) تعمل بلا
- * node_modules، لذلك يجب أن تكون حزمة main مكتفية بذاتها. electron-vite يستثني
- * تلقائيًا `electron` ووحدات Node المدمجة، والباقي (zod) يُضمَّن في الحزمة.
+ * التطبيق يُوزَّع كنسخة محمولة بلا node_modules، لذلك يجب أن تكون حزمة العملية
+ * الرئيسية مكتفية بذاتها: نُعطّل التخريج التلقائي للاعتماديات (externalizeDeps)
+ * ليُضمَّن zod داخل الحزمة، وتبقى `electron` ووحدات Node المدمجة خارجية فقط.
  */
 export default defineConfig({
   main: {
     resolve: { alias: { '@shared': shared } },
     build: {
+      externalizeDeps: false,
       rollupOptions: {
         output: { inlineDynamicImports: true },
       },
@@ -20,6 +21,9 @@ export default defineConfig({
   },
   preload: {
     resolve: { alias: { '@shared': shared } },
+    build: {
+      externalizeDeps: false,
+    },
   },
   renderer: {
     root: 'src/renderer',

@@ -22,3 +22,6 @@ logs/
 backups/
 
 *.tsbuildinfo
+
+# Replit Agent workspace metadata
+.agents/

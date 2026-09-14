@@ -1,6 +1,6 @@
 import type { Database } from '../db/sqlite';
 import { appendAudit } from './audit';
-import { hashPassword, newId, nowIso, verifyPassword } from './crypto';
+import { hashPassword, nowIso, verifyPassword } from './crypto';
 import {
   LOCKOUT_MINUTES,
   MIN_PASSWORD_LENGTH,

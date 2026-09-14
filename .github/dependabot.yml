@@ -13,8 +13,14 @@ updates:
       - dependencies
     commit-message:
       prefix: 'deps'
+    ignore:
+      # الترقيات الكبرى (semver-major) تُدار يدويًا لأنها تتطلب ترحيلًا واختبارًا،
+      # وتبقى تنبيهات الأمان ظاهرة في تبويب Security لمراجعتها.
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
     groups:
-      # تحديثات الأمان تُطلق فورًا كطلب مستقل
+      # تحديثات الأمان تُطلق كطلب مستقل فورًا
       security:
         applies-to: security-updates
         patterns: ['*']

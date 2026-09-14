@@ -4,6 +4,8 @@
 **محلي بالكامل**: يعمل دون إنترنت، ودون خادم، ودون أي خدمة سحابية، وبقاعدة بيانات على الجهاز نفسه.
 
 [![CI](https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/actions/workflows/ci.yml/badge.svg)](https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/actions/workflows/codeql.yml/badge.svg)](https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/actions/workflows/codeql.yml)
+[![Release](https://img.shields.io/github/v/release/ibrahims78/Damascus-Health-Directorate-Central-Warehouses?label=release)](https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-44.3.0-47848F.svg)](https://www.electronjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6.svg)](https://www.typescriptlang.org/)
@@ -92,13 +94,17 @@ npm run build         # البناء الإنتاجي
 npm run verify        # كل ما سبق بالتتابع
 ```
 
-### بناء نسخة محمولة (Portable) تعمل دون تثبيت
+### نسخة محمولة (Portable) تعمل دون تثبيت
 
-تُبنى من وقت تشغيل Electron المحلي + مخرجات البناء داخل `resources/app`:
+**الطريقة الأسهل:** نزّل الحزمة الجاهزة من [صفحة الإصدارات](https://github.com/ibrahims78/Damascus-Health-Directorate-Central-Warehouses/releases/latest) — فُك الضغط ثم شغّل الملف التنفيذي مباشرة.
 
+**أو ابنِها محليًا** (وقت تشغيل Electron المحلي + مخرجات البناء داخل `resources/app`):
+
+```bash
+npm run build:portable      # ينتج: release/portable/WHSHAM-Central-Warehouses.exe
 ```
-release/portable/WHSHAM-Central-Warehouses.exe
-```
+
+الموقع التعريفي للمشروع (GitHub Pages): <https://ibrahims78.github.io/Damascus-Health-Directorate-Central-Warehouses/>
 
 عند أول تشغيل تُكتب كلمة مرور المدير الأولية في
 `%APPDATA%\damascus-health-directorate-central-warehouses\first-run-admin-password.txt`

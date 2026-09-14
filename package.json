@@ -1,9 +1,10 @@
 {
   "name": "damascus-health-directorate-central-warehouses",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "private": true,
   "description": "مستودعات مديرية صحة دمشق المركزية — تطبيق سطح مكتب محلي بالكامل",
   "main": "out/main/index.js",
+  "license": "MIT",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
@@ -13,6 +14,7 @@
     "test:e2e": "esbuild tests/scenario.e2e.ts --bundle --platform=node --format=cjs --target=node20 --alias:@shared=./src/shared --outfile=tests/.build/scenario.e2e.cjs && node tests/.build/scenario.e2e.cjs",
     "verify": "npm run typecheck && npm run test && npm run test:e2e && npm run build",
     "setup:electron": "node scripts/setup-electron.mjs",
+    "build:portable": "npm run build && node scripts/build-portable.mjs",
     "dist": "electron-vite build && electron-builder --win nsis"
   },
   "dependencies": {
@@ -47,6 +49,7 @@
       "package.json"
     ],
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis"
       ]
@@ -55,7 +58,9 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "WHSHAM-CentralWarehouses-Setup-${version}.exe"
+      "artifactName": "WHSHAM-CentralWarehouses-Setup-${version}.exe",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     }
   }
 }

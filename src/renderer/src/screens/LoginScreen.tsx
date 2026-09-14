@@ -37,7 +37,7 @@ export default function LoginScreen({
           <li>‏• سجل تدقيق مُسلسَل بالبصمات لكشف أي تعديل.</li>
           <li>‏• حركات المخزون بنظام FIFO داخل معاملات آمنة.</li>
         </ul>
-        <div className="text-xs text-white/60">الإصدار 0.1.0 — نسخة سطح مكتب</div>
+        <div className="text-xs text-white/60">الإصدار 1.0.0 — نسخة سطح مكتب</div>
       </div>
 
       <div className="flex items-center justify-center p-8">

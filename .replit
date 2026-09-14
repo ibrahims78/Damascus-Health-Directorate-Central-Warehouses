@@ -5,16 +5,7 @@ channel = "stable-25_05"
 packages = ["glib", "gtk3", "nss", "nspr", "alsa-lib", "cups", "dbus", "expat", "libdrm", "mesa", "pango", "cairo", "atk", "at-spi2-atk", "libxkbcommon", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXfixes", "xorg.libXrandr", "xorg.libXrender", "xorg.libxcb", "xorg.libXi", "libgbm"]
 
 [workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start application"
+runButton = "Start application"
 
 [[workflows.workflow]]
 name = "Start application"
